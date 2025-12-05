@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -11,7 +12,7 @@
         <module name="notification-service" />
         <module name="fraud-detection-service" />
       </profile>
-      <profile name="Annotation profile for account-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -20,8 +21,8 @@
         </processorPath>
         <module name="ai-assistant-service" />
         <module name="auth-service" />
-        <module name="config-service" />
         <module name="payment-service" />
+        <module name="config-service" />
         <module name="gateway-service" />
         <module name="transaction-service" />
         <module name="user-service" />

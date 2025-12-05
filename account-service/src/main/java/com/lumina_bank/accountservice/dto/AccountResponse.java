@@ -1,6 +1,7 @@
 package com.lumina_bank.accountservice.dto;
 
 import com.lumina_bank.accountservice.enums.AccountType;
+import com.lumina_bank.accountservice.enums.Currency;
 import com.lumina_bank.accountservice.enums.Status;
 import com.lumina_bank.accountservice.model.Account;
 import lombok.Builder;
@@ -14,7 +15,7 @@ public record AccountResponse(
         Long userId,
         BigDecimal balance,
         String iban,
-        String currency,
+        Currency currency,
         String status,
         String type,
         LocalDateTime createdAt,

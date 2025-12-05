@@ -6,27 +6,37 @@ import com.lumina_bank.transactionservice.model.Transaction;
 import com.lumina_bank.transactionservice.sevice.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/transfer")
     public ResponseEntity<?> makeTransaction(@Valid @RequestBody TransactionCreateDto request) {
-        Transaction transaction = transactionService.makeTransaction(
-                request.fromAccountId(),
-                request.toAccountId(),
-                request.amount(),
-                request.description()
-        );
-        return ResponseEntity.ok(TransactionResponse.fromEntity(transaction));
+        log.info("POST /transactions/transfer - Making Transaction");
+
+        Transaction transaction = transactionService.makeTransaction(request);
+
+        log.info("Transaction created id = {}",transaction.getId());
+
+        return ResponseEntity.created(URI.create("/transactions/" + transaction.getId()))
+                .body(TransactionResponse.fromEntity(transaction, transaction.getFromAccountId()));
+
+    }
+
+    @GetMapping("/{accountId}")
+    public ResponseEntity<?> getTransactions(@PathVariable("accountId") Long accountId) {
+        log.info("GET /transactions/{accountId} - Fetching transactions with accountId={}", accountId);
+
+        return ResponseEntity.ok(transactionService.getAllUsersTransactions(accountId));
     }
 
 }

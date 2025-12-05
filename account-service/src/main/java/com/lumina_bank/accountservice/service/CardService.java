@@ -4,6 +4,7 @@ import com.lumina_bank.accountservice.dto.CardCreateDto;
 import com.lumina_bank.accountservice.dto.CardResponse;
 import com.lumina_bank.accountservice.enums.AccountType;
 import com.lumina_bank.accountservice.enums.Status;
+import com.lumina_bank.accountservice.exception.CardNotFoundException;
 import com.lumina_bank.accountservice.model.Account;
 import com.lumina_bank.accountservice.model.Card;
 import com.lumina_bank.accountservice.repository.AccountRepository;
@@ -29,13 +30,13 @@ public class CardService {
         Account account = accountService.getAccountById(accountId);
 
         String cardNumber = generateCardNumber();
-        while(cardRepository.existsByCardNumber(cardNumber)){
+        while (cardRepository.existsByCardNumber(cardNumber)) {
             cardNumber = generateCardNumber();
         }
 
         Card card = Card.builder()
                 .cardNumber(cardNumber)
-                .expirationDate(YearMonth.now().plusYears(4))// TODO: можливо доробити щоб не завжди 4 роки термін діїї
+                .expirationDate(YearMonth.now().plusYears(4))// TODO: можливо доробити щоб не завжди 4 роки термін дії
                 .cvv(generateCVV())
                 .cardType(cardCreateDto.cardType())
                 .cardNetwork(cardCreateDto.cardNetwork())
@@ -57,34 +58,35 @@ public class CardService {
     }
 
     @Transactional(readOnly = true)
-    public List<CardResponse> getCardsByAccountId(Long accountId) {
+    public List<CardResponse> getCardsByAccountId(Long accountId,Status status) {
         Account account = accountService.getAccountById(accountId);
 
         return cardRepository.findAllByAccount(account)
                 .stream()
-                .filter((Card card) -> card.getStatus() == Status.ACTIVE)
+                .filter((Card card) -> card.getStatus() == status)
                 .map(CardResponse::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
     public Card getCardById(Long cardId) {
         return cardRepository.findById(cardId)
-                .orElseThrow(()-> new NoSuchElementException("Card with id " + cardId + " not found"));
+                .orElseThrow(() -> new CardNotFoundException("Card with id " + cardId + " not found"));
     }
 
 
-    private String generateCardNumber(){
+    private String generateCardNumber() {
         Random random = new Random();
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < 16; i++){
+        for (int i = 0; i < 16; i++) {
             sb.append(random.nextInt(10));
         }
         return sb.toString();
     }
 
-    private String generateCVV(){
+    private String generateCVV() {
         Random random = new Random();
-        int cvv = random.nextInt(999);
-        return String.valueOf(cvv);
+        // Формуємо число від 0 до 999, і завжди отримуємо 3 символи (з ведучими нулями)
+        return String.format("%03d", random.nextInt(1000));
     }
+
 }

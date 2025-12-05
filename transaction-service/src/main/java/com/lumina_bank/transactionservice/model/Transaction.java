@@ -1,9 +1,9 @@
 package com.lumina_bank.transactionservice.model;
 
-import com.lumina_bank.transactionservice.enums.Status;
+import com.lumina_bank.transactionservice.enums.Currency;
+import com.lumina_bank.transactionservice.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -28,15 +28,25 @@ public class Transaction {
     private Long fromAccountId;
     @Column(nullable = false)
     private Long toAccountId;
-    @Column(nullable = false)
+    @Column(nullable = false,precision = 15, scale = 2)
     private BigDecimal amount;
-    @Column(nullable = false)
     private String description;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private TransactionStatus transactionStatus;
+
+    @Enumerated(EnumType.STRING)
+    private Currency fromCurrency;
+    @Enumerated(EnumType.STRING)
+    private Currency toCurrency;
+
+    @Column(precision = 15, scale = 6)
+    private BigDecimal exchangeRate;
+
+    @Column(precision = 15, scale = 6)
+    private BigDecimal convertedAmount;
 
     @CreatedDate
-    @Column(nullable = false,updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

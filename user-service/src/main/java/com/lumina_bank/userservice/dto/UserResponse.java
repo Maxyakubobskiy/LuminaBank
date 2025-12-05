@@ -30,5 +30,4 @@ public record UserResponse(
                 role(user.getRole()).
                 build();
     }
-
 }

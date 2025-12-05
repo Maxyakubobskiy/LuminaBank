@@ -1,7 +1,9 @@
 package com.lumina_bank.accountservice.model;
 
 import com.lumina_bank.accountservice.enums.AccountType;
+import com.lumina_bank.accountservice.enums.Currency;
 import com.lumina_bank.accountservice.enums.Status;
+import com.lumina_bank.accountservice.enums.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -26,15 +28,22 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private Long userId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private UserType userType;
+
+    @Column(nullable = false,precision = 15, scale = 2)
     private BigDecimal balance;
     @Column(unique = true, nullable = false)
     private String iban;
+
     @Column(nullable = false)
-    private String currency;//валюта
+    @Enumerated(EnumType.STRING)
+    private Currency currency;//валюта
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -50,6 +59,6 @@ public class Account {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "account",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Card> cards;
 }

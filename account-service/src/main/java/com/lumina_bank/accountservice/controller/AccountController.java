@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,14 +23,16 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<?> createAccount(@Valid @RequestBody AccountCreateDto accountDto) {
         Account account = accountService.createAccount(accountDto);
-        return ResponseEntity.ok(AccountResponse.fromEntity(account));
+        return ResponseEntity.created(URI.create("/accounts/" + account.getId()))
+                .body(AccountResponse.fromEntity(account));
+
     }
 
     @PutMapping("/{accountId}/deposit")
     public ResponseEntity<?> deposit(
             @PathVariable Long accountId,
             @Valid @RequestBody AccountOperationDto accountDto) {
-        Account updateAccount = accountService.deposit(accountId,accountDto.amount());
+        Account updateAccount = accountService.deposit(accountId, accountDto.amount());
         return ResponseEntity.ok(AccountResponse.fromEntity(updateAccount));
     }
 
@@ -37,23 +40,26 @@ public class AccountController {
     public ResponseEntity<?> withdraw(
             @PathVariable Long accountId,
             @Valid @RequestBody AccountOperationDto accountDto
-    ){
-        Account updateAccount = accountService.withdraw(accountId,accountDto.amount());
+    ) {
+        Account updateAccount = accountService.withdraw(accountId, accountDto.amount());
         return ResponseEntity.ok(AccountResponse.fromEntity(updateAccount));
     }
 
     @GetMapping("/{userId}/user-accounts")
-    public ResponseEntity<?> getUserAccounts(@PathVariable Long userId){
+    public ResponseEntity<?> getUserAccounts(@PathVariable Long userId) {
         return ResponseEntity.ok().body(accountService.getAccountsByUserId(userId));
     }
 
-    @PutMapping("/{accountId}")
-    public ResponseEntity<?> setActiveAccount(
-            @PathVariable Long accountId,
-            @RequestBody Status status){
-        Account account = accountService.setActive(accountId,status);
-        return ResponseEntity.ok(AccountResponse.fromEntity(account));
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAccount(@PathVariable Long id) {
+        return ResponseEntity.ok().body(accountService.getAccountById(id));
     }
 
-
+    @PatchMapping("/{accountId}")
+    public ResponseEntity<?> setActiveAccount(
+            @PathVariable Long accountId,
+            @RequestBody Status status) {
+        Account account = accountService.setActive(accountId, status);
+        return ResponseEntity.ok(AccountResponse.fromEntity(account));
+    }
 }

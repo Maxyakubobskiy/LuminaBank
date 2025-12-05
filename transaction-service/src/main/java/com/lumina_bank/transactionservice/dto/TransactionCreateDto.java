@@ -1,5 +1,6 @@
 package com.lumina_bank.transactionservice.dto;
 
+import com.lumina_bank.transactionservice.enums.Currency;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -20,6 +21,11 @@ public record TransactionCreateDto(
         BigDecimal amount,
 
         @Size(max = 255, message = "Description must be at most 255 characters long")
-        String description
+        String description,
+
+        Currency fromCurrency,
+        Currency toCurrency,
+        BigDecimal convertedAmount,
+        BigDecimal exchangeRate
 ) {
 }

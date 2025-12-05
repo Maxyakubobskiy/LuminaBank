@@ -1,5 +1,6 @@
 package com.lumina_bank.accountservice.controller;
 
+import com.lumina_bank.accountservice.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,7 +16,7 @@ public class GlobalExceptionHandler {
 
     // Валідація DTO Request
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex){
+    public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
@@ -23,20 +24,40 @@ public class GlobalExceptionHandler {
     }
 
     // Некоректні дані
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex){
-        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+    @ExceptionHandler(InvalidAmountException.class)
+    public ResponseEntity<?> handleInvalidAmountException(InvalidAmountException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<?> handleInsufficientBalanceException(InsufficientBalanceException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
     }
 
     // Запис не знайдено
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException ex){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    @ExceptionHandler(CardNotFoundException.class)
+    public ResponseEntity<?> handleCardNotFoundException(CardNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<?> handleAccountNotFoundException(AccountNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
     }
 
     //Інші помилки
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<?> handleAccountLockedException(AccountLockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleOtherException(Exception ex){
+    public ResponseEntity<?> handleOtherException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ex.getMessage()));
     }
 }

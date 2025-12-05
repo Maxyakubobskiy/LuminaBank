@@ -30,6 +30,7 @@ spring:
               uri: lb://account-service
               predicates:
                   - Path=/api/accounts/**
+                  - Path=/api/cards/**
               filters:
                   - StripPrefix=1
 
@@ -37,5 +38,12 @@ spring:
               uri: lb://transaction-service
               predicates:
                 - Path=/api/transactions/**
+              filters:
+                - StripPrefix=1
+
+            - id: payment-service
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/payments/**
               filters:
                 - StripPrefix=1

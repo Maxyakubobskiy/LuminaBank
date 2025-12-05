@@ -4,6 +4,11 @@ import com.lumina_bank.accountservice.dto.AccountCreateDto;
 import com.lumina_bank.accountservice.dto.AccountResponse;
 import com.lumina_bank.accountservice.enums.CountryBankCode;
 import com.lumina_bank.accountservice.enums.Status;
+import com.lumina_bank.accountservice.enums.UserType;
+import com.lumina_bank.accountservice.exception.AccountLockedException;
+import com.lumina_bank.accountservice.exception.AccountNotFoundException;
+import com.lumina_bank.accountservice.exception.InsufficientBalanceException;
+import com.lumina_bank.accountservice.exception.InvalidAmountException;
 import com.lumina_bank.accountservice.model.Account;
 import com.lumina_bank.accountservice.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +29,14 @@ public class AccountService {
 
     @Transactional
     public Account createAccount(AccountCreateDto accountDto) {
-         String iban = generateIban();
-         while (accountRepository.existsByIban(iban))
-             iban = generateIban();
+        String iban = generateIban();
+        while (accountRepository.existsByIban(iban))
+            iban = generateIban();
 
+        //TODO:додати перевірку чи існує юзер
         Account account = Account.builder().
                 userId(accountDto.userId()).
+                userType(UserType.INDIVIDUAL).
                 balance(BigDecimal.ZERO).
                 iban(iban).
                 currency(accountDto.currency()).
@@ -49,25 +56,32 @@ public class AccountService {
     }
 
     @Transactional
-    public Account deposit (Long id, BigDecimal amount) {
-        if(amount.compareTo(BigDecimal.ZERO) < 0){
-            throw new IllegalArgumentException("Amount must be greater than zero");
+    public Account deposit(Long id, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
         Account account = getAccountById(id);
+        if (account.getStatus() != Status.ACTIVE) {
+            throw new AccountLockedException("Account is not active");
+        }
         account.setBalance(account.getBalance().add(amount));
         return accountRepository.save(account);
     }
 
     @Transactional
-    public Account withdraw (Long id, BigDecimal amount) {
-        if(amount.compareTo(BigDecimal.ZERO) < 0){
-            throw new IllegalArgumentException("Amount must be greater than zero");
+    public Account withdraw(Long id, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
 
         Account account = getAccountById(id);
 
-        if (account.getBalance().compareTo(amount) < 0 ) {
-            throw new IllegalArgumentException("Insufficient balance");
+        if (account.getStatus() != Status.ACTIVE) {
+            throw new AccountLockedException("Account is not active");
+        }
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException("Not enough money to complete transaction");
         }
 
         account.setBalance(account.getBalance().subtract(amount));
@@ -77,22 +91,21 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Account getAccountById(Long accountId) {
         return accountRepository.findById(accountId)
-                .orElseThrow(()-> new NoSuchElementException("Account with id " + accountId + " not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Account with id " + accountId + " not found"));
     }
 
     @Transactional(readOnly = true)
     public Account getAccountByIban(String iban) {
         return accountRepository.findByIban(iban)
-                .orElseThrow(()-> new NoSuchElementException("Account with iban " + iban + " not found"));
-
+                .orElseThrow(() -> new AccountNotFoundException("Account with iban " + iban + " not found"));
     }
 
-    private String generateIban(){
+    private String generateIban() {
         Random random = new Random();
-        int controlDigit = random.nextInt(90)+10;
+        int controlDigit = random.nextInt(90) + 10;
 
         StringBuilder accountNumber = new StringBuilder();
-        for (int i = 0; i < 19; i++){
+        for (int i = 0; i < 19; i++) {
             accountNumber.append(random.nextInt(10));
         }
         return CountryBankCode.UA.name() + controlDigit + CountryBankCode.UA.getBankCode() + accountNumber;
@@ -103,7 +116,7 @@ public class AccountService {
         Account account = getAccountById(accountId);
         account.setStatus(status);
 
-        if(status.equals(Status.INACTIVE) || status.equals(Status.BLOCKED)){
+        if (status.equals(Status.INACTIVE) || status.equals(Status.BLOCKED)) {
             account.getCards().forEach((card) -> card.setStatus(status));
         }
 

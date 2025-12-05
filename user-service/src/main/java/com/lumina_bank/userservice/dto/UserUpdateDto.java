@@ -17,5 +17,4 @@ public record UserUpdateDto(
         String zipCode,
         String country
 ) {
-
 }

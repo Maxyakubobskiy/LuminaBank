@@ -16,4 +16,5 @@ public record AccountResponse(
         String type,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-){}
+) {
+}

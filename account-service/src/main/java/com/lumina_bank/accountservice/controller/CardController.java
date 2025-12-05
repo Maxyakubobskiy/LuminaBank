@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/accounts/cards")
+@RequestMapping("/cards")
 @RequiredArgsConstructor
 public class CardController {
     private final CardService cardService;
@@ -21,7 +21,7 @@ public class CardController {
     public ResponseEntity<?> addCard(
             @PathVariable Long accountId,
             @Valid @RequestBody CardCreateDto cardCreateDto) {
-        Card card = cardService.createCard(accountId,cardCreateDto);
+        Card card = cardService.createCard(accountId, cardCreateDto);
         return ResponseEntity.ok().body(CardResponse.fromEntity(card));
     }
 
@@ -29,12 +29,12 @@ public class CardController {
     public ResponseEntity<?> setActiveCard(
             @PathVariable Long cardId,
             @RequestBody Status status) {
-        Card card = cardService.setActive(cardId,status);
+        Card card = cardService.setActive(cardId, status);
         return ResponseEntity.ok().body(CardResponse.fromEntity(card));
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<?> getCardsByAccountId(@PathVariable Long accountId) {
-        return ResponseEntity.ok().body(cardService.getCardsByAccountId(accountId));
+    public ResponseEntity<?> getCardsByAccountId(@PathVariable Long accountId,@RequestBody Status status) {
+        return ResponseEntity.ok().body(cardService.getCardsByAccountId(accountId,status));
     }
 }

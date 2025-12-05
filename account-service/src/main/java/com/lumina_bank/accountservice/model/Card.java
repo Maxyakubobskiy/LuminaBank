@@ -48,7 +48,7 @@ public class Card {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
-    @Column(nullable = false,name = "card_limit")
+    @Column(nullable = false, name = "card_limit",precision = 15, scale = 2)
     private BigDecimal limit;
 
     @CreatedDate

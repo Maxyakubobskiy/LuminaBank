@@ -1,9 +1,9 @@
 package com.lumina_bank.accountservice.dto;
 
-import com.lumina_bank.accountservice.enums.Status;
 import com.lumina_bank.accountservice.model.Card;
 import jakarta.persistence.*;
 import lombok.Builder;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.YearMonth;

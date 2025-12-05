@@ -1,6 +1,6 @@
 package com.lumina_bank.transactionservice.enums;
 
-public enum Status {
+public enum TransactionStatus {
     SUCCESS,
     FAILURE,
     PENDING,
